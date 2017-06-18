@@ -113,3 +113,15 @@ that's just a guess.
 
 One last note here: regardless of the IDE used, every submitted project must
 still be compilable with cmake and make./
+
+
+## Build
+
+* Under /lib/ ipopt library is installed
+* Under /lib/include there are coin/*.h files
+
+~~~
+g++ -o mpc MPC.cpp MPC.h json.hpp main.cpp -std=c++11 -I/lib/include/ -L/lib/ -luWS -luv -lz -lssl -lipopt
+~~~
+
+

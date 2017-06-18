@@ -96,7 +96,9 @@ int main() {
           double v = j[1]["speed"];
 
           //fit a polynomial to the above x and y coordinates
-          auto coeffs = polyfit(ptsx, ptsy, 3);
+          Eigen::VectorXd ptsxx = Eigen::Map<Eigen::VectorXd>(&ptsx[0],ptsx.size());
+          Eigen::VectorXd ptsyy = Eigen::Map<Eigen::VectorXd>(&ptsy[0],ptsy.size());
+          auto coeffs = polyfit(ptsxx, ptsyy, 3);
 
           //calculate the cross track error
           double cte = polyeval(coeffs, px) - py;
