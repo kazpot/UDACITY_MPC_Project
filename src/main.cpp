@@ -121,7 +121,7 @@ int main() {
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
           
-          double steer_value = vars[6]/deg2rad(25);
+          double steer_value = vars[6]/deg2rad(25) * -1;
           double throttle_value = vars[7];
 
           steer_value = steer_value <= -1 ? -1 : steer_value; 
