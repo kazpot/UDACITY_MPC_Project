@@ -116,12 +116,20 @@ int main() {
           auto vars = mpc.Solve(state, coeffs);
           state << vars[0], vars[1], vars[2], vars[3], vars[4], vars[5];
 
-          double steer_value = vars[6]/deg2rad(25);
-          double throttle_value = vars[7];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
+          
+          double steer_value = vars[6]/deg2rad(25);
+          double throttle_value = vars[7];
+
+          steer_value = steer_value <= -1 ? -1 : steer_value; 
+          steer_value = steer_value >= 1 ? 1 : steer_value; 
+
+          throttle_value = throttle_value <= -1 ? -1 : throttle_value; 
+          throttle_value = throttle_value >= 1 ? 1 : throttle_value; 
+          
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
 
