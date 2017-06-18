@@ -102,20 +102,19 @@ int main() {
           for(int i=0; i < ptsx.size(); i++){
               double diffx = ptsx[i] - px;
               double diffy = ptsy[i] - py;
-              carpts_x.push_back(diffx * cos(psi) - dy * sin(psi));
-              carpts_y.push_back(diffx * sin(psi) - dy * cos(psi));
+              carpts_x.push_back(diffx * cos(psi) - diffy * sin(psi));
+              carpts_y.push_back(diffx * sin(psi) - diffy * cos(psi));
           }
 
-          double carx = cartpts_x[0];
-          double cary = cartpts_y[0];
+          Eigen::VectorXd carxx = Eigen::Map<Eigen::VectorXd>(&carpts_x[0],carpts_x.size());
+          Eigen::VectorXd caryy = Eigen::Map<Eigen::VectorXd>(&carpts_y[0],carpts_y.size()); 
  
- 
-          auto coeffs = polyfit(carx, cary, 3);
+          auto coeffs = polyfit(carxx, caryy, 3);
 
           //calculate the cross track error
           double cte = polyeval(coeffs, 0) - 0;
           //calculate the orientation error
-          double epsi = - atan(coeffs(1));
+          double epsi = -atan(coeffs(1));
 
           state << 0, 0, 0, v, cte, epsi;
 
