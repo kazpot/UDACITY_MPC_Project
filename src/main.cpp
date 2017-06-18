@@ -101,7 +101,7 @@ int main() {
               double diffx = ptsx[i] - px;
               double diffy = ptsy[i] - py;
               carpts_x.push_back(diffx * cos(-psi) - diffy * sin(-psi));
-              carpts_y.push_back(diffx * sin(-psi) - diffy * cos(-psi));
+              carpts_y.push_back(diffx * sin(-psi) + diffy * cos(-psi));
           }
 
           Eigen::VectorXd carxx = Eigen::Map<Eigen::VectorXd>(&carpts_x[0],carpts_x.size());
