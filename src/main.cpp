@@ -96,16 +96,28 @@ int main() {
           double v = j[1]["speed"];
 
           //fit a polynomial to the above x and y coordinates
-          Eigen::VectorXd ptsxx = Eigen::Map<Eigen::VectorXd>(&ptsx[0],ptsx.size());
-          Eigen::VectorXd ptsyy = Eigen::Map<Eigen::VectorXd>(&ptsy[0],ptsy.size());
-          auto coeffs = polyfit(ptsxx, ptsyy, 3);
+          vector<double> carpts_x; 
+          vector<double> carpts_y;
+          
+          for(int i=0; i < ptsx.size(); i++){
+              double diffx = ptsx[i] - px;
+              double diffy = ptsy[i] - py;
+              carpts_x.push_back(diffx * cos(psi) - dy * sin(psi));
+              carpts_y.push_back(diffx * sin(psi) - dy * cos(psi));
+          }
+
+          double carx = cartpts_x[0];
+          double cary = cartpts_y[0];
+ 
+ 
+          auto coeffs = polyfit(carx, cary, 3);
 
           //calculate the cross track error
-          double cte = polyeval(coeffs, px) - py;
+          double cte = polyeval(coeffs, 0) - 0;
           //calculate the orientation error
-          double epsi = psi - atan(coeffs(1) * px * px + coeffs(2) * px);
+          double epsi = - atan(coeffs(1));
 
-          state << px, py, psi, v, cte, epsi;
+          state << 0, 0, 0, v, cte, epsi;
 
           /*
           * TODO: Calculate steering angle and throttle using MPC.
@@ -123,12 +135,6 @@ int main() {
           
           double steer_value = vars[6]/deg2rad(25) * -1;
           double throttle_value = vars[7];
-
-          steer_value = steer_value <= -1 ? -1 : steer_value; 
-          steer_value = steer_value >= 1 ? 1 : steer_value; 
-
-          throttle_value = throttle_value <= -1 ? -1 : throttle_value; 
-          throttle_value = throttle_value >= 1 ? 1 : throttle_value; 
           
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
