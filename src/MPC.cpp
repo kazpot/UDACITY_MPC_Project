@@ -7,12 +7,8 @@ using CppAD::AD;
 
 // TODO: Set the timestep length and duration
 
-//N=10, dt=0.1
-//N=20, dt=0.1 worse 
-//N=10, dt=0.05 still bad
-//N=20, dt=0.05
-size_t N = 20;
-double dt = 0.05;
+size_t N = 15;
+double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -27,7 +23,7 @@ double dt = 0.05;
 const double Lf = 2.67;
 
 //reference velocity
-double ref_v = 40;
+double ref_v = 35;
 
 //start indices for variables
 size_t x_start = 0;
@@ -55,21 +51,22 @@ class FG_eval {
 
     //any anything you think may be beneficial.
     for (int t = 0; t < N; t++) {
-        fg[0] += 2000 * CppAD::pow(vars[cte_start + t], 2);
-        fg[0] += 2000 * CppAD::pow(vars[epsi_start + t], 2);
+        fg[0] += CppAD::pow(vars[cte_start + t], 2);
+        fg[0] += CppAD::pow(vars[epsi_start + t], 2);
         fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
     //minimize the use of actuators.
     for (int t = 0; t < N - 1; t++) {
-        fg[0] += 300 * CppAD::pow(vars[delta_start + t], 2);
-        fg[0] += 300 * CppAD::pow(vars[a_start + t], 2);
+        fg[0] += 10 * CppAD::pow(vars[delta_start + t], 2);
+        fg[0] += 15 * CppAD::pow(vars[a_start + t], 2);
+        fg[0] += CppAD::pow(vars[delta_start + t] * vars[v_start+t], 2);
     }
 
     //minimize the value gap between sequential actuations.
     for (int t = 0; t < N - 2; t++) {
-        fg[0] += 100 * CppAD::pow(vars[delta_start + t +1] - vars[delta_start + t], 2);
-        fg[0] += 100 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+        fg[0] += 19 * CppAD::pow(vars[delta_start + t +1] - vars[delta_start + t], 2);
+        fg[0] += 15 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 
     //initial constraints
