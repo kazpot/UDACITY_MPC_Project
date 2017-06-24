@@ -1,6 +1,86 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
+## Objective 
+
+MPC(Model Predictive Control) is one of the important control methods to minimize the cross track and orientation errors of the vehicle with respect to the way points on the track. Objective of this project is to run around the track on the simulator successfully. This is achieved by MPC which has the ability to approximate a continuos reference trajectory by means of discrete paths between actuations.   
+
+
+## MPC Algorithm
+
+Setup:
+
+    Define the length of the trajectory, N, and duration of each timestep, dt.
+    Define vehicle dynamics and actuator limitations along with other constraints.
+    Define the cost function.
+
+Loop:
+
+    We pass the current state as the initial state to the model predictive controller.
+    We call the optimization solver. Given the initial state, the solver will return the vector of control inputs that minimizes the cost function. The solver we'll use is called Ipopt.
+    We apply the first control input to the vehicle.
+    Back to 1.
+
+
+
+## The Model
+
+The vehicle state:
+
+* x: position of the vehicle in logintudinal direction
+* y: position of the vehicle in lateral direction
+* psi: orientation of the vehicle
+* v: speed of the vehicle
+
+The actuations:
+
+* delta: steering angle in radian
+* a: acceleration 
+
+The errors:
+* cte: cross track error
+* epsi: orientation error
+
+The others:
+* Lf: distance between the vehicle's front and center of gravity
+* dt: time duration
+
+The update equations for the state at next time step:
+~~~
+      // Equations for the model:
+      // x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+      // y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+      // psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+      // v_[t+1] = v[t] + a[t] * dt
+      // cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+      // epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+~~~
+
+## Time Length and Elapsed Duration (N & dt)
+
+N is the number of timesteps. dt is how much time elapses between actuations. If N is 15 and dt is 0.1, then T would be 1.5 seconds.I started with N=25 and dt=0.05 (1.25 sec), but it didn't make good result. Next I tried N=10 and dt=0.1 (1.0 sec) and this makes better result, but when the car enters into sharp corners, it tended to overshoot probably due to latency. Finally I set N=15 and dt=0.1 (1.5 sec) and made the best result considering latency.    
+
+
+## Polynomial Fitting and MPC Preprocessing
+
+At first, I transformed waypoints into the vehicle cordinate system. The x, y, and psi are zero at initial state because the cordinate is relative to the vehicle. I fit 3 order polynomial and got coefficients in (coeffs[0] + coeffs[1] * x + coeffs[2] * x^2 + coeffs[3] * x^3)  to calculate the cross track error and orientation error for passing to the MPC solver later. 
+
+## Model Predictive Control with Latency
+
+The latency issue affects cross track error and orientation error because 100ms latency makes increase those values. The steering and acceleration values are already past value when calculating those values by solver for the first time step. I adjusted N and dt values and look 2 steps ahead for mpc predicted way points to mitigate this issue. As result with N=15 and dt=0.1 (1.5 sec) made the smooth run and the best result.  
+
+~~~
+          //Use 2 time-steps ahead
+          for (int i = 6; i < vars.size(); i ++) {
+            if (i % 2 == 0) {
+              mpc_x_vals.push_back(vars[i]);
+            }
+            else {
+              mpc_y_vals.push_back(vars[i]);
+            }
+          }
+~~~
+
 ---
 
 ## Dependencies
